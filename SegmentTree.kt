@@ -6,75 +6,49 @@ val two_pow:(Int) -> Int = {a: Int ->
     res
 }
 
-val min: (Int, Int)->Int = {a:Int, b:Int -> if (a<b) a else b}
-val max: (Int, Int)->Int = {a:Int, b:Int -> if (a>b) a else b}
-val sum: (Int, Int)->Int = {a:Int, b:Int -> a+b}
-
-
-class Segment_node(_sum: Int, _max:Int, _min:Int) {
+class segment_node(_sum: Int, _max:Int, _min:Int) {
     var sum=_sum
     var max=_max
     var min = _min
 }
 
-class segmentTree(_array: IntArray) {
-    private var size=two_pow.invoke(_array.size)*2-1
-    var array= Array(size) { Segment_node(0, 0, 0) }
-    init {
-        for (i in _array.indices) {
-            array[size/2+i].min=_array[i]
-            array[size/2+i].max=_array[i]
-            array[size/2+i].sum=_array[i]
-        }
+class segmentTree() {
+    var array= Array<segment_node>(0,  {segment_node(0,0,0)})
+    var size=0
+
+    constructor(_array: IntArray) : this() {
+        size=two_pow.invoke(_array.size)*2-1
+        array =IntArray(size)
+        _array.copyInto(array, array.size/2)
         var i=size-1
         while (i>0) {
-            array[(i-1)/2].min= min(array[i].min, array[i-1].min)
-            array[(i-1)/2].max= max(array[i].min, array[i-1].min)
-            array[(i-1)/2].sum= sum.invoke(array[i].sum, array[i-1].sum)
+            array[(i-1)/2]=array[i]+array[i-1]
             i-=2
-        }
-    }
-    private fun set_sum(i: Int) {
-        var t=i
-        while (t>0) {
-            if (t%2==0)
-                array[(t-1)/2].sum=sum.invoke(array[t].sum, array[t-1].sum)
-            else
-                array[(t-1)/2].sum=sum.invoke(array[t].sum, array[t+1].sum)
-            t=(t-1)/2
-        }
-    }
-
-    private fun set_maxmin(i: Int) {
-        var t=i
-        while (t>0) {
-            if (t%2==0) {
-                array[(t - 1) / 2].max = max(array[t].max, array[t - 1].max)
-                array[(t - 1) / 2].min = max(array[t].min, array[t - 1].min)
-            } else {
-                array[(t - 1) / 2].max = max(array[t].max, array[t + 1].max)
-                array[(t - 1) / 2].min = max(array[t].min, array[t + 1].min)
-            }
-            t=(t-1)/2
         }
     }
 
     fun set(i: Int, value: Int) {
-        this.array[i+size/2].sum=value
-        set_sum(i+size/2)
-        set_maxmin(i+size/2)
+        var t=i+(size+1)/2
+        this.array[t]=value
+        while (t>0) {
+            if (t%2==0)
+                array[(t-1)/2]=array[t]+array[t-1]
+            else
+                array[(t-1)/2]=array[t]+array[t+1]
+            t=(t-1)/2
+        }
     }
 
     fun sum(left: Int, right: Int): Int {
-        var l=left+size/2
-        var r=right+size/2
+        var l=left+(size-1)/2
+        var r=right+(size-1)/2
         var count=0
         while (l<=r) {
             if (l%2==0)
-                count+=array[l].sum
+                count+=array[l]
             l/=2
             if (r%2!=0)
-                count+=array[r].sum
+                count+=array[r]
             r=r/2-1
         }
         return count
@@ -84,11 +58,11 @@ class segmentTree(_array: IntArray) {
 fun main() {
     var s="4 7 8 5 6 2 1 4 7 8".split(" ").map { it.toInt() }.toIntArray()
     var w=segmentTree(s)
-    w.array.map{ print("${it.sum} ") }
+    w.array.map{ print("$it ") }
     w.set(5, 11)
     w.set(7, -1)
     println()
-    w.array.map{ print("${it.sum} ") }
+    w.array.map{ print("$it ") }
     println()
-    println(w.sum(5, 7))
+    println(w.sum(4, 4))
 }
