@@ -5,10 +5,10 @@ val two_pow:(Int) -> Int = {a: Int ->
         res*=2
     res
 }
+
 val min: (Int, Int) -> Int = {a:Int, b: Int -> if (a<b) a else b}
 
 class segmentTree(_array: IntArray) {
-
     var size=two_pow.invoke(_array.size)*2-1
     var array= IntArray(size)
 
