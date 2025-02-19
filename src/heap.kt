@@ -48,8 +48,12 @@ class Heap(ints: IntArray) {
     }
 
     fun extractMax(): Int {
-        var res=array.first()
-        this.set(0, array.last())
+        return extract(0)
+    }
+
+    fun extract(index: Int): Int {
+        val res=array[index]
+        set(index, array.last())
         array=array.dropLast(1).toIntArray()
         return res
     }
@@ -61,3 +65,4 @@ fun heap_sort(array: IntArray) {
     for (i in array.indices)
         array[i]=obj.extractMax()
 }
+
