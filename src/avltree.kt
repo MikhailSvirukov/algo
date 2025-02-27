@@ -1,3 +1,7 @@
+import kotlin.math.max
+
+// TODO определить, что не так с удалением, потому что коректно только удаление листа
+
 
 class Node(a: Int) {
     var value: Int?=a
@@ -6,6 +10,7 @@ class Node(a: Int) {
     var height=1
 
     fun getBalance(): Int {
+        height= max((right?.height ?: 0), (left?.height ?: 0))+1
         return (right?.value ?: 0) - (left?.value ?: 0)
     }
 }
@@ -19,28 +24,27 @@ class AVLTree() {
             root= Node(a)
             return
         }
-
         if (a>=(node?.value ?: Int.MIN_VALUE)) {
-            if (node?.right == null)
+            if (node?.right == null) {
                 node?.right = Node(a)
-            else {
+                return
+            }else {
                 add(a, node.right)
                 node.right?.getBalance()
-                return
             }
-
         } else {
-            if (node?.left == null)
+            if (node?.left == null) {
                 node?.left = Node(a)
-            else {
-
+                return
+            }else {
                 add(a, node.left)
                 node.left?.getBalance()
-                return
             }
         }
-        root?.getBalance()
+        if (node==root)
+            root?.getBalance()
     }
+
     //correct
     fun find(a: Int, node: Node?): Node? {
         if (node?.value == a)
@@ -55,9 +59,10 @@ class AVLTree() {
             return find(a, node.left)
         }
     }
+
     //correct
     //предполагается, что ищется предок ТОЛЬКО существующего узла
-    private fun findParent(target: Int?, node: Node?): Node? {
+     fun findParent(target: Int?, node: Node?): Node? {
         //случай с корнем
         if (target==node?.value)
             return root
@@ -69,6 +74,7 @@ class AVLTree() {
         }
         return null
     }
+
     //correct
     private fun findUpperBorder(node: Node?): Node? {
         val t=node?.right
@@ -80,16 +86,12 @@ class AVLTree() {
 
     private fun changeDeletion(node: Node?, basic: Node?) {
         var t=node?.right
-        if (t?.left!=null) {
-            findUpperBorder(t.left)
-            t.getBalance()
-        } else {
-            basic?.value=t?.value
-            var w=findParent(t?.value, root)
-            w?.left=null
-            w?.getBalance()
-        }
-
+        if (t?.left!=null)
+            t=findUpperBorder(t.left)
+        basic?.value=t?.value
+        var w=findParent(t?.value, root)
+        w?.left=null
+        w?.getBalance()
     }
 
     //будем счиатать, что удаляется ТОЛЬКО существующий узел
@@ -140,5 +142,6 @@ fun printPaths(tree: AVLTree) {
 fun main() {
     var avl=AVLTree()
     readln().split(" ").map { avl.add(it.toInt(), avl.root) }
-    println(avl.findUpperBorder(avl.root?.left?.left)?.value)
+    avl.remove(4, avl.root)
+    println(avl.findParent(5, avl.root)?.value)
 }
