@@ -13,29 +13,35 @@ class Node(a: Int) {
 
 class AVLTree() {
     var root:Node?=null
-
+    //correct
     fun add(a: Int, node: Node?) {
         if (root==null) {
-            root = Node(a)
+            root= Node(a)
             return
         }
-        if (a>=(root?.value ?: Int.MIN_VALUE))
-            if (root?.right==null)
-                root?.right=Node(a)
+
+        if (a>=(node?.value ?: Int.MIN_VALUE)) {
+            if (node?.right == null)
+                node?.right = Node(a)
             else {
-                add(a, root?.right)
-                root?.right?.getBalance()
+                add(a, node.right)
+                node.right?.getBalance()
+                return
             }
-        else
-            if (root?.left==null)
-                root?.left=Node(a)
+
+        } else {
+            if (node?.left == null)
+                node?.left = Node(a)
             else {
-                add(a, root?.left)
-                root?.left?.getBalance()
+
+                add(a, node.left)
+                node.left?.getBalance()
+                return
             }
+        }
         root?.getBalance()
     }
-
+    //correct
     fun find(a: Int, node: Node?): Node? {
         if (node?.value == a)
             return node
@@ -49,12 +55,12 @@ class AVLTree() {
             return find(a, node.left)
         }
     }
-
+    //correct
     //предполагается, что ищется предок ТОЛЬКО существующего узла
     private fun findParent(target: Int?, node: Node?): Node? {
         //случай с корнем
         if (target==node?.value)
-            return null
+            return root
         if (target != null) {
             if (target<(node?.value ?: Int.MAX_VALUE))
                 return if (node?.left?.value==target) node else node?.left?.let { findParent(target, it) }
@@ -63,9 +69,9 @@ class AVLTree() {
         }
         return null
     }
-
+    //correct
     private fun findUpperBorder(node: Node?): Node? {
-        var t=node?.right
+        val t=node?.right
         if (t?.left!=null)
             return findUpperBorder(t.left)
         else
@@ -113,7 +119,26 @@ class AVLTree() {
         if (node==root)
             root?.getBalance()
     }
+}
 
+fun printPaths(tree: AVLTree) {
+    var stack=ArrayDeque<Node?>()
+    stack.addLast(tree.root)
+    while (stack.isNotEmpty()) {
+        var r=stack.removeFirst()
+        print("${r?.value} ")
+        if (r?.right==null && r?.left==null) {
+            println()
+        } else {
+            stack.addLast(r.left)
+            stack.addLast(r.right)
+        }
 
+    }
+}
 
+fun main() {
+    var avl=AVLTree()
+    readln().split(" ").map { avl.add(it.toInt(), avl.root) }
+    println(avl.findUpperBorder(avl.root?.left?.left)?.value)
 }
