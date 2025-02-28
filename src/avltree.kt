@@ -84,34 +84,58 @@ class AVLTree() {
             return t
     }
 
-    private fun changeDeletion(node: Node?, basic: Node?) {
-        var t=node?.right
-        if (t?.left!=null)
-            t=findUpperBorder(t.left)
-        basic?.value=t?.value
-        var w=findParent(t?.value, root)
-        w?.left=null
-        w?.getBalance()
+    private fun changeDeletion(node: Node?, basic: Node?, parent: Node?) {
+        if (node?.left==null) {
+            if (parent?.left==basic)
+                parent?.left=node
+            else
+                parent?.right=node
+        } else if (node.left?.left==null){
+            basic?.value=node.left?.value
+            node.left=null
+        } else {
+            changeDeletion(node.left, basic, parent)
+        }
+        node?.left?.getBalance()
     }
 
     //будем счиатать, что удаляется ТОЛЬКО существующий узел
     fun remove(a: Int, node: Node?) {
-        if (node?.value==a) {
-            var t = findParent(node.value, root)
-            if (node.right == null && node.left == null) {
-                if (t?.left?.value == a)
-                    t.left = null
-                else
-                    t?.right = null
-            } else if (node.right == null) {
-                if (t?.left?.value == a)
-                    t.left = t.left?.left
-                else
-                    t?.right = t?.left?.left
-            } else
-                changeDeletion(node.right, node)
+        if (node?.value == a) {
+            if (node.right==null)
+                root=node.left
+            else {
+                changeDeletion(node.right, root, root)
+                root?.getBalance()
+            }
             return
-        } else if ((node?.value ?: Int.MIN_VALUE)>a) {
+        }
+        if (node?.right != null) {
+            if (node.right?.value == a) {
+                //println("********")
+                if (node.right?.right==null && node.right?.left==null)
+                    node.right=null
+                else if (node.right?.right==null)
+                    node.right=node.right?.left
+                else {
+                    changeDeletion(node.right?.right, node.right, node)
+                }
+                return
+            }
+        }
+        if (node?.left != null) {
+            if (node.left?.value == a) {
+                if (node.left?.right==null && node.left?.left==null)
+                    node.left=null
+                else if (node.left?.right==null)
+                    node.left=node.left?.left
+                else {
+                    changeDeletion(node.left?.right, node.left, node)
+                }
+                return
+            }
+        }
+        if ((node?.value ?: Int.MIN_VALUE) > a) {
             remove(a, node?.left)
             node?.left?.getBalance()
         } else {
@@ -142,6 +166,24 @@ fun printPaths(tree: AVLTree) {
 fun main() {
     var avl=AVLTree()
     readln().split(" ").map { avl.add(it.toInt(), avl.root) }
-    avl.remove(4, avl.root)
+    avl.remove(8, avl.root)
+    println(avl.find(8, avl.root)?.height)
+    println(avl.find(5, avl.root)?.height)
+    println(avl.find(10, avl.root)?.height)
+    println(avl.find(7, avl.root)?.height)
+    println(avl.find(6, avl.root)?.height)
+    println(avl.find(9, avl.root)?.height)
+    println(avl.find(1, avl.root)?.height)
+    println(avl.find(2, avl.root)?.height)
+    println(avl.find(4, avl.root)?.height)
+    println("---------------------------------")
+    println(avl.findParent(8, avl.root)?.value)
     println(avl.findParent(5, avl.root)?.value)
+    println(avl.findParent(10, avl.root)?.value)
+    println(avl.findParent(7, avl.root)?.value)
+    println(avl.findParent(6, avl.root)?.value)
+    println(avl.findParent(9, avl.root)?.value)
+    println(avl.findParent(1, avl.root)?.value)
+    println(avl.findParent(2, avl.root)?.value)
+    println(avl.findParent(4, avl.root)?.value)
 }
