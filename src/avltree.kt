@@ -1,8 +1,5 @@
 import kotlin.math.max
 
-// TODO определить, что не так с удалением, потому что коректно только удаление листа
-
-
 class Node(a: Int) {
     var value: Int?=a
     var left:Node?=null
@@ -18,7 +15,7 @@ class Node(a: Int) {
 
 class AVLTree() {
     var root:Node?=null
-    //correct
+
     fun add(a: Int, node: Node?) {
         if (root==null) {
             root= Node(a)
@@ -45,11 +42,10 @@ class AVLTree() {
             checkHeight(root)
     }
 
-    //correct
-    fun find(a: Int, node: Node?): Node? {
+    fun find(a: Int?, node: Node?): Node? {
         if (node?.value == a)
             return node
-        if ((node?.value ?: Int.MIN_VALUE)<a) {
+        if ((node?.value ?: Int.MIN_VALUE)<(a ?: Int.MAX_VALUE)) {
             if (node?.right == null)
                 return null
             return find(a, node.right)
@@ -60,10 +56,9 @@ class AVLTree() {
         }
     }
 
-    //correct
-    //предполагается, что ищется предок ТОЛЬКО существующего узла
      fun findParent(target: Int?, node: Node?): Node? {
-        //случай с корнем
+        if (find(target, root)==null)
+            return null
         if (target==node?.value)
             return root
         if (target != null) {
@@ -75,8 +70,7 @@ class AVLTree() {
         return null
     }
 
-    //correct
-    private fun findUpperBorder(node: Node?): Node? {
+    fun findUpperBorder(node: Node?): Node? {
         val t=node?.right
         if (t?.left!=null)
             return findUpperBorder(t.left)
@@ -86,7 +80,10 @@ class AVLTree() {
 
     private fun changeDeletion(node: Node?, basic: Node?, parent: Node?) {
         if (node?.left==null) {
-            if (parent?.left==basic)
+            if (basic==parent) {
+                node?.left=root?.left
+                root=node
+            } else if (parent?.left==basic)
                 parent?.left=node
             else
                 parent?.right=node
@@ -99,8 +96,9 @@ class AVLTree() {
         checkHeight(node?.left)
     }
 
-    //будем счиатать, что удаляется ТОЛЬКО существующий узел
     fun remove(a: Int, node: Node?) {
+        if (find(a, root)==null)
+            return
         if (node?.value == a) {
             if (node.right==null)
                 root=node.left
@@ -134,6 +132,7 @@ class AVLTree() {
                 return
             }
         }
+
         if ((node?.value ?: Int.MIN_VALUE) > a) {
             remove(a, node?.left)
             checkHeight(node?.left)
@@ -147,22 +146,32 @@ class AVLTree() {
 
     private fun rotateLeft(node: Node?, parent: Node?) {
         val temp=node?.right
-        println(node?.right)
         node?.right=temp?.left
         temp?.left=node
-        if (parent?.right==node)
-            parent?.right=temp
+        if (parent==root) {
+            root = temp
+            node?.getBalance()
+            return
+        }
+        if (parent?.right == node)
+            parent?.right = temp
         else
-            parent?.left=temp
+            parent?.left = temp
         node?.getBalance()
         temp?.getBalance()
         parent?.getBalance()
 
     }
+
     private fun rotateRight(node: Node?, parent: Node?) {
         val temp=node?.left
         node?.left=temp?.right
         temp?.right=node
+        if (parent==root) {
+            root = temp
+            node?.getBalance()
+            return
+        }
         if (parent?.right==node)
             parent?.right=temp
         else
@@ -172,10 +181,8 @@ class AVLTree() {
         parent?.getBalance()
     }
 
-    fun checkHeight(node: Node?) {
+    private fun checkHeight(node: Node?) {
         var parent=findParent(node?.value, root)
-        if (parent==node)
-            parent=this.root
         if (node?.getBalance()==2) {
             println(node.right?.value)
 
@@ -196,38 +203,9 @@ class AVLTree() {
     }
 }
 
-fun printPaths(tree: AVLTree) {
-    var stack=ArrayDeque<Node?>()
-    stack.addLast(tree.root)
-    while (stack.isNotEmpty()) {
-        var r=stack.removeFirst()
-        print("${r?.value} ")
-        if (r?.right==null && r?.left==null) {
-            println()
-        } else {
-            stack.addLast(r.left)
-            stack.addLast(r.right)
-        }
 
-    }
-}
 
 fun main() {
     var avl=AVLTree()
     readln().split(" ").map { avl.add(it.toInt(), avl.root) }
-    //avl.remove(8, avl.root)
-    println("++++++++++++++++++++++")
-    println(avl.find(14, avl.root)?.height)
-    println(avl.find(13, avl.root)?.height)
-    println(avl.find(18, avl.root)?.height)
-    println(avl.find(19, avl.root)?.height)
-    println(avl.find(16, avl.root)?.height)
-    println(avl.find(15, avl.root)?.height)
-    println("---------------------------------")
-    println(avl.findParent(14, avl.root)?.value)
-    println(avl.findParent(13, avl.root)?.value)
-    println(avl.findParent(18, avl.root)?.value)
-    println(avl.findParent(19, avl.root)?.value)
-    println(avl.findParent(16, avl.root)?.value)
-    println(avl.findParent(15, avl.root)?.value)
 }
