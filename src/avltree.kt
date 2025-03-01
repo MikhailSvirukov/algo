@@ -11,7 +11,7 @@ class Node(a: Int) {
 
     fun getBalance(): Int {
         height= max((right?.height ?: 0), (left?.height ?: 0))+1
-        return (right?.value ?: 0) - (left?.value ?: 0)
+        return (right?.height ?: 0) - (left?.height ?: 0)
     }
 }
 
@@ -30,7 +30,7 @@ class AVLTree() {
                 return
             }else {
                 add(a, node.right)
-                node.right?.getBalance()
+                checkHeight(node.right)
             }
         } else {
             if (node?.left == null) {
@@ -38,11 +38,11 @@ class AVLTree() {
                 return
             }else {
                 add(a, node.left)
-                node.left?.getBalance()
+                checkHeight(node.left)
             }
         }
         if (node==root)
-            root?.getBalance()
+            checkHeight(root)
     }
 
     //correct
@@ -96,7 +96,7 @@ class AVLTree() {
         } else {
             changeDeletion(node.left, basic, parent)
         }
-        node?.left?.getBalance()
+        checkHeight(node?.left)
     }
 
     //будем счиатать, что удаляется ТОЛЬКО существующий узел
@@ -106,13 +106,12 @@ class AVLTree() {
                 root=node.left
             else {
                 changeDeletion(node.right, root, root)
-                root?.getBalance()
+                checkHeight(root)
             }
             return
         }
         if (node?.right != null) {
             if (node.right?.value == a) {
-                //println("********")
                 if (node.right?.right==null && node.right?.left==null)
                     node.right=null
                 else if (node.right?.right==null)
@@ -137,13 +136,63 @@ class AVLTree() {
         }
         if ((node?.value ?: Int.MIN_VALUE) > a) {
             remove(a, node?.left)
-            node?.left?.getBalance()
+            checkHeight(node?.left)
         } else {
             remove(a, node?.right)
-            node?.right?.getBalance()
+            checkHeight(node?.right)
         }
         if (node==root)
-            root?.getBalance()
+            checkHeight(root)
+    }
+
+    private fun rotateLeft(node: Node?, parent: Node?) {
+        val temp=node?.right
+        println(node?.right)
+        node?.right=temp?.left
+        temp?.left=node
+        if (parent?.right==node)
+            parent?.right=temp
+        else
+            parent?.left=temp
+        node?.getBalance()
+        temp?.getBalance()
+        parent?.getBalance()
+
+    }
+    private fun rotateRight(node: Node?, parent: Node?) {
+        val temp=node?.left
+        node?.left=temp?.right
+        temp?.right=node
+        if (parent?.right==node)
+            parent?.right=temp
+        else
+            parent?.left=temp
+        node?.getBalance()
+        temp?.getBalance()
+        parent?.getBalance()
+    }
+
+    fun checkHeight(node: Node?) {
+        var parent=findParent(node?.value, root)
+        if (parent==node)
+            parent=this.root
+        if (node?.getBalance()==2) {
+            println(node.right?.value)
+
+            if ((node.right?.getBalance() ?: Int.MIN_VALUE)>-1)
+                rotateLeft(node, parent)
+            else {
+                rotateRight(node.right, node)
+                rotateLeft(node, parent)
+            }
+        } else if (node?.getBalance()==-2) {
+            if ((node.left?.getBalance() ?: Int.MIN_VALUE)<1)
+                rotateRight(node, parent)
+            else {
+                rotateLeft(node.left, node)
+                rotateRight(node, parent)
+            }
+        }
     }
 }
 
@@ -166,24 +215,19 @@ fun printPaths(tree: AVLTree) {
 fun main() {
     var avl=AVLTree()
     readln().split(" ").map { avl.add(it.toInt(), avl.root) }
-    avl.remove(8, avl.root)
-    println(avl.find(8, avl.root)?.height)
-    println(avl.find(5, avl.root)?.height)
-    println(avl.find(10, avl.root)?.height)
-    println(avl.find(7, avl.root)?.height)
-    println(avl.find(6, avl.root)?.height)
-    println(avl.find(9, avl.root)?.height)
-    println(avl.find(1, avl.root)?.height)
-    println(avl.find(2, avl.root)?.height)
-    println(avl.find(4, avl.root)?.height)
+    //avl.remove(8, avl.root)
+    println("++++++++++++++++++++++")
+    println(avl.find(14, avl.root)?.height)
+    println(avl.find(13, avl.root)?.height)
+    println(avl.find(18, avl.root)?.height)
+    println(avl.find(19, avl.root)?.height)
+    println(avl.find(16, avl.root)?.height)
+    println(avl.find(15, avl.root)?.height)
     println("---------------------------------")
-    println(avl.findParent(8, avl.root)?.value)
-    println(avl.findParent(5, avl.root)?.value)
-    println(avl.findParent(10, avl.root)?.value)
-    println(avl.findParent(7, avl.root)?.value)
-    println(avl.findParent(6, avl.root)?.value)
-    println(avl.findParent(9, avl.root)?.value)
-    println(avl.findParent(1, avl.root)?.value)
-    println(avl.findParent(2, avl.root)?.value)
-    println(avl.findParent(4, avl.root)?.value)
+    println(avl.findParent(14, avl.root)?.value)
+    println(avl.findParent(13, avl.root)?.value)
+    println(avl.findParent(18, avl.root)?.value)
+    println(avl.findParent(19, avl.root)?.value)
+    println(avl.findParent(16, avl.root)?.value)
+    println(avl.findParent(15, avl.root)?.value)
 }
