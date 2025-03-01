@@ -1,3 +1,4 @@
+import kotlin.math.min
 
 val pow:(Int) -> Int = {a: Int ->
     var res=1
