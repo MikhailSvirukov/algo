@@ -9,9 +9,7 @@ class Heap(ints: IntArray) {
     init {
         for (i in array.indices)
             elementUp(i)
-
     }
-
     private fun elementUp(index: Int): Boolean {
         var t=index
         while (t>0 && array[t]>array[(t-1)/2]) {
@@ -20,7 +18,6 @@ class Heap(ints: IntArray) {
         }
         return t == index
     }
-
     private fun elementDown(index: Int) {
         if (2*index+1<array.size && array[index]<array[2*index+1]) {
             array.swap(index, 2*index+1)
